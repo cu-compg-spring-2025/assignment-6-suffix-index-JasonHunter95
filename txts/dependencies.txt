@@ -1,0 +1,14 @@
+import subprocess
+import os
+brew install git+https://github.com/cjdrake/ipython-magic.git 
+    or 
+pip install git+https://github.com/cjdrake/ipython-magic.git
+    and then
+brew create git+https://github.com/cjdrake/ipython-magic.git                                                   
+Formula name [ipython-magic]: <graphicviz>
+brew tap --force homebrew/core
+    or
+copy lines 7 & 9 above and replace with pip if thats what you use
+
+
+

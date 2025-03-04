@@ -1,0 +1,8 @@
+python3 src/suffix_trie.py --string BANANA --query ANANA NANA ANA A NA $ BANANA$
+python3 src/suffix_trie.py --string PIKACHU --query PIKACHU$ PICHU
+python3 src/suffix_trie.py --string RATATA --query A TA ATA XYZ ATZ TATA RATATAT RATATA RATATA$
+python3 src/suffix_trie.py --string CINNAMON --query CINNAMON INNAMON AMON AXON CINNAMON$
+python3 src/suffix_trie.py --string MESSY --query ESSY  SY$ $ Y$ MESSY$
+python3 src/suffix_trie.py --string MESSYCINNAMON4EVER --query ESSY EVER 4EVER CINNAMON4EVER MESSYCINNAMON4EVER$
+python3 src/suffix_trie.py --string CAT --query CAT CAC CA AT
+

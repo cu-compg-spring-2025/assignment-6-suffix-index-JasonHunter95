@@ -163,3 +163,5 @@ cython_debug/
 dots/wuhana-hu_*-*.dot
 dots/kcnq2_*-*.dot
 dots/chr22_*-*.dot
+
+scratch.txt

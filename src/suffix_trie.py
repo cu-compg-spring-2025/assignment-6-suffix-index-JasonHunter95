@@ -43,7 +43,7 @@ def build_suffix_trie(s, show_progress=True):
     
     iterator = tqdm.tqdm(range(len(s)), desc="Building suffix trie") if show_progress else range(len(s))
     # for memory reporting purposes
-    report_interval = max(1, len(s) // 10)  # reports ~10 times
+    # report_interval = max(1, len(s) // 10)  # reports ~10 times
 
     for i in iterator:
         current = root
@@ -53,33 +53,25 @@ def build_suffix_trie(s, show_progress=True):
             current = current[char]
             
         # report memory usage
-        if i % report_interval == 0:
-            current_mem = process.memory_info().rss / 1024 / 1024
-            mem_increase = current_mem - start_mem
-            print(f"Memory usage: {current_mem:.2f} MB (+{mem_increase:.2f} MB)")
+        # if i % report_interval == 0:
+        #     current_mem = process.memory_info().rss / 1024 / 1024
+        #     mem_increase = current_mem - start_mem
+        #     print(f"Memory usage: {current_mem:.2f} MB (+{mem_increase:.2f} MB)")
     return root
 
-def search_trie(trie, pattern, s):
+def search_trie(trie, pattern):
     current = trie ## start at the root
     match_len = 0 
     
     for i, char in enumerate(pattern):
         if char in current: # each node contains a dictionary of children thats nested horribly in the console output
-            # so we it
-            # move to the next node down
             current = current[char]
             match_len += 1
-            # print(f"Matched '{char}' at position {i}, current match length: {match_len}")
+            print(f"Matched '{char}' at position {i}, current match length: {match_len}")
         else:
-            # print(f"Did not match '{char}', breaking the loop here at {i}")
-            return 0
-    
-    if(match_len - 1 == len(s)):
-        # print(f"Matched the entirety of the deepest node of the trie: {s}")
-        return match_len
-    else:
-        # print(f"Matched the pattern: {pattern}")
-        return match_len
+            print(f"Did not match '{char}', breaking the loop here at {i}")
+            break
+    return match_len
     
 def visualize_region(full_sequence, region_str, max_size, reference_path):
     """
@@ -198,7 +190,7 @@ def main():
         generate_png_from_dot(dot_directory)
         if args.query:
             for query in args.query:
-                match_len = search_trie(trie, query, T)
+                match_len = search_trie(trie, query)
                 print(f'{query} : {match_len}')
                 
     # passing in the FASTA file
@@ -215,14 +207,21 @@ def main():
             
         
         # if args.query:
-        #     # only build the trie if we have queries to search for so other things work properly
-        #     # literally needs to be sent to a supercomputer to run this!!!
-        #     print(f"Attempting to build suffix trie for complete sequence ({len(T)} bp)...")
-        #     trie = build_suffix_trie(T)
-        #     print("Trie built, processing queries...")
-        #     for query in args.query:
-        #         match_len = search_trie(trie, query, T)
-        #         print(f'{query} : {match_len}')
+        #     print(f"Warning: Building suffix trie for complete sequence ({len(T)} bp)")
+        #     print(f"This may consume significant memory and time.")
+            # only build the trie if we have queries to search for so other things work properly
+            # literally needs to be sent to a supercomputer to run this!!!
+            # response = input("Continue? (y/n): ")
+            # if response.lower() != 'y':
+            #     print("Exiting.")
+            #     return
+            # else:
+            #     print(f"Attempting to build suffix trie for complete sequence ({len(T)} bp) hopefully your computer is FAT")
+            #     trie = build_suffix_trie(T)
+            #     print("Trie built, processing queries...")
+            #     for query in args.query:
+            #         match_len = search_trie(trie, query, T)
+            #         print(f'{query} : {match_len}')
 
 
 

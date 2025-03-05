@@ -1,0 +1,23 @@
+digraph "Suffix trie" {
+  node [shape=circle label=""];
+  0 -> 1 [ label="M" ];
+  1 -> 2 [ label="E" ];
+  2 -> 3 [ label="S" ];
+  3 -> 4 [ label="S" ];
+  4 -> 5 [ label="Y" ];
+  5 -> 6 [ label="$" ];
+  0 -> 7 [ label="E" ];
+  7 -> 8 [ label="S" ];
+  8 -> 9 [ label="S" ];
+  9 -> 10 [ label="Y" ];
+  10 -> 11 [ label="$" ];
+  0 -> 12 [ label="S" ];
+  12 -> 13 [ label="S" ];
+  13 -> 14 [ label="Y" ];
+  14 -> 15 [ label="$" ];
+  12 -> 16 [ label="Y" ];
+  16 -> 17 [ label="$" ];
+  0 -> 18 [ label="Y" ];
+  18 -> 19 [ label="$" ];
+  0 -> 20 [ label="$" ];
+}

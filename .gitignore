@@ -160,8 +160,12 @@ cython_debug/
 #.idea/
 
 # Ignoring abnormally large dot files for generating trees with genome data
-dots/wuhana-hu_*-*.dot
-dots/kcnq2_*-*.dot
-dots/chr22_*-*.dot
+dots/suffix_tree/wuhana-hu_*-*.dot
+dots/suffix_tree/kcnq2_*-*.dot
+dots/suffix_tree/chr22_*-*.dot
+
+dots/suffix_trie/wuhana-hu_*-*.dot
+dots/suffix_trie/kcnq2_*-*.dot
+dots/suffix_trie/chr22_*-*.dot
 
 scratch.txt

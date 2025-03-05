@@ -72,98 +72,6 @@ def search_trie(trie, pattern):
             print(f"Did not match '{char}', breaking the loop here at {i}")
             break
     return match_len
-    
-def visualize_region(full_sequence, region_str, max_size, reference_path):
-    """
-    Create a suffix trie visualization for a specific region of a sequence
-    
-    Parameters:
-        full_sequence (str): The complete sequence
-        region_str (str): Region in format 'start-end'
-        max_size (int): Maximum allowed region size
-        reference_name (str): Name of the reference for output filename
-        
-    Returns:
-        tuple: (success (bool), message (str))
-    """
-    try:
-        start, end = map(int, region_str.split('-'))
-        
-        # validate region
-        if start < 0 or end > len(full_sequence) or start >= end:
-            return False, f"Invalid region: {start}-{end}. Sequence length is {len(full_sequence)}."
-        
-        # check size limit
-        if end - start > max_size:
-            print(f"Warning: Selected region exceeds max size ({max_size}). Truncating.")
-            end = start + max_size
-            
-        # extract region and build trie
-        region_sequence = full_sequence[start:end]
-        trie_region = build_suffix_trie(region_sequence)
-        
-        reference_filename = os.path.basename(reference_path)
-        reference_name = os.path.splitext(reference_filename)[0]
-        
-        # remove the .fa.gz extension
-        if '.' in reference_name:
-            reference_name = reference_name.split('.')[0]
-        
-        # visualize the region
-        region_name = f"{reference_name}_{start}-{end}"
-        dot_output = to_dot(trie_region)
-        
-        # ensure directories exist
-        os.makedirs('dots', exist_ok=True)
-        os.makedirs('pngs', exist_ok=True)
-        
-        dot_file = os.path.join('dots', f'{region_name}.dot')
-        
-        
-        with open(dot_file, 'w') as f:
-            f.write(dot_output)
-            
-        generate_png_from_dot(dot_file)
-        return True, f"Generated visualization for region {start}-{end}"
-        
-    except ValueError:
-        return False, "Error: Region should be in format 'start-end', e.g., '100-300'"
-
-
-def to_dot(trie):
-    """ Return dot representation of trie to make a picture """
-    lines = []
-    node_counter = [0]  # use a list to allow modification in nested function
-    
-    def _to_dot_helper(node, parid):
-        current_id = node_counter[0]
-        node_counter[0] += 1
-        
-        for char, child in node.items():
-            child_id = node_counter[0]
-            lines.append(f'  {current_id} -> {child_id} [ label="{char}" ];')
-            _to_dot_helper(child, child_id)
-        
-    lines.append('digraph "Suffix trie" {')
-    lines.append('  node [shape=circle label=""];')
-    _to_dot_helper(trie, 0)
-    lines.append('}')
-    return '\n'.join(lines) + '\n'
-
-def generate_png_from_dot(dot_file):
-    """Convert a DOT file to PNG using the dot command"""
-    # grab the filename
-    filename = os.path.basename(dot_file)
-    # grab the file path for the images
-    png_dir = os.path.join('.', 'pngs')
-
-    # create the name of each image
-    png_file = os.path.join(png_dir, filename.replace('.dot', '.png'))
-    
-    try: # run the console command but in a function instead of a shell script
-        subprocess.run(['dot', '-Tpng', dot_file, '-o', png_file], check=True)
-    except subprocess.CalledProcessError as e:
-        print(f"Error generating PNG: {e}")
 
 
     
@@ -174,20 +82,28 @@ def main():
 
 
     T = None
+    
+    # create script-specific directories
+    dot_dir = os.path.join('dots', 'suffix_trie')
+    png_dir = os.path.join('pngs', 'suffix_trie')
+    
+    # create directories if they don't exist
+    os.makedirs(dot_dir, exist_ok=True)
+    os.makedirs(png_dir, exist_ok=True)
 
     # passing in the string directly for testing
     if args.string:
         T = args.string
         trie = build_suffix_trie(T)
                 
-        dot_output = to_dot(trie)
+        dot_output = utils.to_dot(trie)
         dot_file = f'{args.string}.dot'
-        dot_directory = os.path.join('dots', dot_file)
+        dot_path = os.path.join(dot_dir, dot_file)
         
-        with open(dot_directory, 'w') as f:
+        with open(dot_path, 'w') as f:
             f.write(dot_output)
             
-        generate_png_from_dot(dot_directory)
+        utils.generate_png_from_dot(dot_path, png_dir)
         if args.query:
             for query in args.query:
                 match_len = search_trie(trie, query)
@@ -200,7 +116,7 @@ def main():
         
         # just handle a specific region
         if args.region:
-            success, message = visualize_region(T, args.region, args.max_size, args.reference)
+            success, message = utils.visualize_region(T, args.region, args.max_size, args.reference, output_prefix='suffix_trie', use_tree=False)
             print(message)
         else:
             print("No region specified. Skipping visualization for large sequence.")

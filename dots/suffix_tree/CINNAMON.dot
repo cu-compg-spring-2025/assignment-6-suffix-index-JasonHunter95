@@ -1,0 +1,24 @@
+digraph "Suffix tree" {
+  node [shape=circle];
+  0 [label="ROOT"];
+  0 -> 1 [ label="C" ];
+  0 -> 2 [ label="I" ];
+  0 -> 4 [ label="N" ];
+  0 -> 6 [ label="A" ];
+  0 -> 7 [ label="M" ];
+  0 -> 8 [ label="O" ];
+  0 -> 10 [ label="$" ];
+  1 [label="CINNAMON$"];
+  2 [label="INNAMON$"];
+  3 [label="NAMON$"];
+  4 [label="N"];
+  4 -> 3 [ label="N" ];
+  4 -> 5 [ label="A" ];
+  4 -> 9 [ label="$" ];
+  5 [label="AMON$"];
+  6 [label="AMON$"];
+  7 [label="MON$"];
+  8 [label="ON$"];
+  9 [label="$"];
+  10 [label="$"];
+}

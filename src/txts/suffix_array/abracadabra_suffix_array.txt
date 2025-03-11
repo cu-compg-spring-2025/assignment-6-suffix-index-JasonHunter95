@@ -1,0 +1,15 @@
+Suffix Array for text: 'abracadabra'
+--------------------------------------------------
+Index | Suffix Position | Suffix
+--------------------------------------------------
+    0 |             10 | a
+    1 |              7 | abra
+    2 |              0 | abracadabra
+    3 |              3 | acadabra
+    4 |              5 | adabra
+    5 |              8 | bra
+    6 |              1 | bracadabra
+    7 |              4 | cadabra
+    8 |              6 | dabra
+    9 |              9 | ra
+   10 |              2 | racadabra

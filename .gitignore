@@ -168,4 +168,23 @@ dots/suffix_trie/wuhana-hu_*-*.dot
 dots/suffix_trie/kcnq2_*-*.dot
 dots/suffix_trie/chr22_*-*.dot
 
+dots/suffix_tree/
+dots/suffix_trie/
+
+pngs/suffix_tree/
+pngs/suffix_trie/
+txts/suffix_array/
+
 scratch.txt
+
+#LaTeX intermediate files
+doc/*.aux
+doc/*.log
+doc/*.synctex.gz
+
+# Testing framework files
+tests/*.py
+pytest.ini
+setup.py
+
+__init__.py

@@ -1,7 +1,6 @@
 import argparse
 import utils
 import psutil
-import subprocess
 import os
 import tqdm
 
@@ -36,10 +35,11 @@ def get_args():
 def build_suffix_trie(s, show_progress=True):
     s += '$'
     root = {}
-    process = psutil.Process(os.getpid())
-    start_mem = process.memory_info().rss / 1024 / 1024
-    available_mem = psutil.virtual_memory().available / 1024 / 1024
-    print("Total available memory: {:.2f} MB".format(available_mem))
+    
+    # process = psutil.Process(os.getpid())
+    # start_mem = process.memory_info().rss / 1024 / 1024
+    # available_mem = psutil.virtual_memory().available / 1024 / 1024
+    # print("Total available memory: {:.2f} MB".format(available_mem))
     
     iterator = tqdm.tqdm(range(len(s)), desc="Building suffix trie") if show_progress else range(len(s))
     # for memory reporting purposes
@@ -67,9 +67,9 @@ def search_trie(trie, pattern):
         if char in current: # each node contains a dictionary of children thats nested horribly in the console output
             current = current[char]
             match_len += 1
-            print(f"Matched '{char}' at position {i}, current match length: {match_len}")
+            # print(f"Matched '{char}' at position {i}, current match length: {match_len}")
         else:
-            print(f"Did not match '{char}', breaking the loop here at {i}")
+            # print(f"Did not match '{char}', breaking the loop here at {i}")
             break
     return match_len
 
@@ -79,8 +79,6 @@ def search_trie(trie, pattern):
 def main():
     args = get_args()
     
-
-
     T = None
     
     # create script-specific directories

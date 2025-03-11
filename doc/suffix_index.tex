@@ -1,0 +1,122 @@
+\documentclass[11pt, letterpaper]{article}
+\usepackage[margin=0.5in]{geometry}
+\usepackage{graphicx}
+
+\begin{document}
+
+\title{Comparison of Performance Across Suffix Tries, Trees, and Arrays}
+\author{Jason Hunter}
+\maketitle
+
+\section{Introduction}
+
+\section{Results}
+
+% \begin{figure}[ht]
+%   \centering
+%   \includegraphics[width=0.6\textwidth]{../output/figures/runtime_comparison_by_extension.png}
+%   \caption{The empirical runtime and of the short-read alignment pipeline with
+%     (left) and without (right) seed \& extend for various $k$-mer sizes and
+%     error rates.}
+%   \label{fig:runtime_comparison}
+% \end{figure}
+
+\subsection{Runtime Comparison}
+
+% \begin{figure}[ht]
+%   \centering
+%   \includegraphics[width=0.6\textwidth]{../output/figures/alignment_success_vs_err_rate_true.png}
+%   \caption{Alignment success rate (sensitivity) vs.\ error rate for different $k$-mer lengths.}
+%   \label{fig:alignment_success}
+% \end{figure}
+
+% \begin{figure}[ht]
+%   \centering
+%   \includegraphics[width=0.6\textwidth]{../output/figures/kmer_specificity_comparison.png}
+%   \caption{Mean number of $k$-mers with hits in the reference vs.\ $k$-mer length.}
+%   \label{fig:kmer_specificity_comparison}
+% \end{figure}
+
+
+
+\section{Methods}
+
+\subsection{}
+
+\subsection{}
+
+\subsection{}
+
+
+\subsection{}
+
+\section{Conclusion}
+
+\section{Dependencies}
+\begin{itemize}
+  \item numpy
+  \item subprocess
+  \item psutil
+  \item pandas
+  \item seaborn
+  \item matplotlib
+  \item tqdm
+  \item argparse
+  \item gzip
+  \item os 
+  \item glob
+  \item GraphicViz
+\end{itemize}
+
+\subsection{Installing GraphicViz}
+To install GraphicViz, the package used to generate the trees and tries in this document, run the following command:
+\begin{verbatim}
+$ pip3 install git+https://github.com/cjdrake/ipython-magic.git
+\end{verbatim}
+
+\newpage
+
+\section{Reproducibility}
+\subsection{Commands to collect this data and reproduce the results}
+I ran these commands to generate and collect the data for the figures in this report. \\
+\textbf{NOTE:} You may need to install some dependencies specified in the README.md file and section 4 of this document. \\
+\textbf{ALSO NOTE:} These commands are shell scripts that can take up to 30 minutes to run, 
+depending on how fast your CPU is.
+\begin{verbatim}
+$ git clone https://github.com/cu-compg-spring-2025/assignment-5-k-mer-index-JasonHunter95.git
+$ cd assignment-5-k-mer-index-JasonHunter95
+$ for k in 12 15 18 21 24; do
+    for error_rate in 0.01 0.033 0.066 0.1; do
+        python3 src/kmer_idx.py \
+          --kmer $k \
+          --reference data/chr22.fa.gz \
+          --read_size 100 \
+          --num_reads 50 \
+          --error_rate $error_rate \
+          --max_mismatches 3 \
+          --gap -2 --miss -1 --match 1 \
+          --show_progress
+    done
+done
+
+$ for k in 12 15 18 21 24; do
+    for error_rate in 0.01 0.033 0.066 0.1; do
+        python3 src/kmer_idx.py \
+          --kmer $k \
+          --reference data/chr22.fa.gz \
+          --read_size 100 \
+          --num_reads 50 \
+          --error_rate $error_rate \
+          --max_mismatches 3 \
+          --gap -2 --miss -1 --match 1 \
+          --use_extension \
+          --show_progress
+    done
+done
+\end{verbatim}
+
+To reproduce these, clone the repository, 
+ensure that you are in the root directory and run the above shell commands
+in the repository root.
+
+\end{document}

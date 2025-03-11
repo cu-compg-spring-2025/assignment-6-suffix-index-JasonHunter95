@@ -1,9 +1,25 @@
 import argparse
-import utils
 import os
+import psutil
+import tqdm
+import subprocess
+import sys
+
+# try different import approaches based on how the script is being run
+try:
+    # try relative import first (for use when imported as module)
+    from . import utils
+except ImportError:
+    try:
+        # try package import (for tests)
+        import src.utils as utils
+    except ImportError:
+        # try direct import (for direct script execution)
+        import utils
 
 SUB = 0
 CHILDREN = 1
+
 
 def get_args():
     parser = argparse.ArgumentParser(description='Suffix Tree')
@@ -62,13 +78,29 @@ def add_suffix(nodes, suf):
         i += j
         n = n2
 
-def build_suffix_tree(text):
+def build_suffix_tree(text, show_progress=True):
     text += "$"
 
     nodes = [ ['', {}] ]
+    
+    process = psutil.Process(os.getpid())
+    start_mem = process.memory_info().rss / 1024 / 1024
+    available_mem = psutil.virtual_memory().available / 1024 / 1024
+    print("Total available memory: {:.2f} MB".format(available_mem))
+        
+    iterator = tqdm.tqdm(range(len(text)), desc="Building suffix tree") if show_progress else range(len(text))
+    
+    ## uncomment this for memory usage reporting in larger runs
+    # report_interval = max(1, len(text) // 10)  # reports ~10 times
 
-    for i in range(len(text)):
+    
+    for i in iterator:
         add_suffix(nodes, text[i:])
+    ## uncomment this for memory usage reporting in larger runs    
+    # if i % report_interval == 0:
+    #     current_mem = process.memory_info().rss / 1024 / 1024
+    #     mem_increase = current_mem - start_mem
+    #     print(f"Memory usage: {current_mem:.2f} MB (+{mem_increase:.2f} MB)")
     
     return nodes
 
@@ -100,11 +132,11 @@ def main():
 
     T = None
     
-    # create script-specific directories
+    # create script-specific directories for dot and png files (organization)
     dot_dir = os.path.join('dots', 'suffix_tree')
     png_dir = os.path.join('pngs', 'suffix_tree')
     
-    # create directories if they don't exist
+    # create directories if they aren't already there
     os.makedirs(dot_dir, exist_ok=True)
     os.makedirs(png_dir, exist_ok=True)
 
@@ -138,6 +170,25 @@ def main():
             print(message)
         else:
             print("No region specified. Skipping visualization for large sequence.")
+            
+        if args.query:
+            print(f"Warning: Building suffix tree for complete sequence ({len(T)} bp)")
+            print(f"This may consume significant memory and time.")
+            # only build the tree if we have queries to search for so other things work properly
+            # works fine for wuhana-hu.fa.gz (29,903 bp) and even kcnq2.fa.gz (72,449 bp)
+            # but not for chr22.fa.gz (1,125,299 bp)
+            # literally needs to be sent to a supercomputer to run this!!!
+            response = input("Continue? (y/n): ")
+            if response.lower() != 'y':
+                print("Exiting.")
+                return
+            else:
+                print(f"Attempting to build suffix tree for complete sequence ({len(T)} bp) hopefully your computer is FAT")
+                tree = build_suffix_tree(T)
+                print("Tree built, processing queries...")
+                for query in args.query:
+                    match_len = search_tree(tree, query)
+                    print(f'{query} : {match_len}')
     
 
 

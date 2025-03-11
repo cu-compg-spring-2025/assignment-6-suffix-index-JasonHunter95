@@ -117,30 +117,29 @@ def visualize_region(full_sequence, region_str, max_size, reference_path, output
         
     except ValueError:
         return False, "Error: Region should be in format 'start-end', e.g., '100-300'"
-    
-    
+       
 def to_dot(structure):
     """ Return dot representation of suffix tree to make a picture """
     lines = []
     
-    # Check if we're dealing with a list-based suffix tree
+    # check if we're dealing with a list-based suffix tree
     if isinstance(structure, list) and len(structure) > 0 and isinstance(structure[0], list):
         lines.append('digraph "Suffix tree" {')
         lines.append('  node [shape=circle];')
         
-        # Process all nodes
+        # process all nodes
         for i, node in enumerate(structure):
-            # Add node with its substring as label if it's not empty
+            # add node with its substring as label if it's not empty
             label = node[0] if node[0] else "ROOT"
             lines.append(f'  {i} [label="{label}"];')
             
-            # Add edges to children
+            # add edges to children
             for char, child_idx in node[1].items():
                 lines.append(f'  {i} -> {child_idx} [ label="{char}" ];')
         
         lines.append('}')
     else:
-        # Original code for dictionary-based tries
+        # original code for dictionary-based tries
         node_counter = [0]  # use a list to allow modification in nested function
         
         def _to_dot_helper(node, parid):
@@ -176,4 +175,30 @@ def generate_png_from_dot(dot_file, png_dir='png'):
         subprocess.run(['dot', '-Tpng', dot_file, '-o', png_file], check=True)
     except subprocess.CalledProcessError as e:
         print(f"Error generating PNG: {e}")
+        
+def visualize_suffix_array(T, suffix_array, output_file=None):
+    # create a text representation for the suffix array
+    lines = []
+    lines.append(f"Suffix Array for text: '{T}'")
+    lines.append("-" * 50)
+    lines.append("Index | Suffix Position | Suffix")
+    lines.append("-" * 50)
+    
+    for i, pos in enumerate(suffix_array):
+        # show at most 30 characters of each suffix to keep the output readable
+        suffix = T[pos:pos+30]
+        if len(T) - pos > 30:
+            suffix += "..."
+        lines.append(f"{i:5d} | {pos:14d} | {suffix}")
+    
+    result = "\n".join(lines)
+    
+    print(result)
+    
+    if output_file:
+        with open(output_file, 'w') as f:
+            f.write(result)
+        print(f"Visualization saved to {output_file}")
+    
+    return result
 

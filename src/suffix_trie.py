@@ -32,7 +32,7 @@ def get_args():
 
     return parser.parse_args()
 
-def build_suffix_trie(s, show_progress=True):
+def build_suffix_trie(s, show_progress=False):
     s += '$'
     root = {}
     
@@ -42,21 +42,12 @@ def build_suffix_trie(s, show_progress=True):
     # print("Total available memory: {:.2f} MB".format(available_mem))
     
     iterator = tqdm.tqdm(range(len(s)), desc="Building suffix trie") if show_progress else range(len(s))
-    # for memory reporting purposes
-    # report_interval = max(1, len(s) // 10)  # reports ~10 times
-
     for i in iterator:
         current = root
         for char in s[i:]:
             if char not in current:
                 current[char] = {}
             current = current[char]
-            
-        # report memory usage
-        # if i % report_interval == 0:
-        #     current_mem = process.memory_info().rss / 1024 / 1024
-        #     mem_increase = current_mem - start_mem
-        #     print(f"Memory usage: {current_mem:.2f} MB (+{mem_increase:.2f} MB)")
     return root
 
 def search_trie(trie, pattern):
@@ -67,14 +58,9 @@ def search_trie(trie, pattern):
         if char in current: # each node contains a dictionary of children thats nested horribly in the console output
             current = current[char]
             match_len += 1
-            # print(f"Matched '{char}' at position {i}, current match length: {match_len}")
         else:
-            # print(f"Did not match '{char}', breaking the loop here at {i}")
             break
     return match_len
-
-
-    
 
 def main():
     args = get_args()
@@ -136,8 +122,6 @@ def main():
             #     for query in args.query:
             #         match_len = search_trie(trie, query, T)
             #         print(f'{query} : {match_len}')
-
-
 
 if __name__ == '__main__':
     main()

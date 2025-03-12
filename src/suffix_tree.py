@@ -1,7 +1,7 @@
 import argparse
 import os
-import psutil
 import tqdm
+import psutil
 import subprocess
 import sys
 
@@ -19,7 +19,6 @@ except ImportError:
 
 SUB = 0
 CHILDREN = 1
-
 
 def get_args():
     parser = argparse.ArgumentParser(description='Suffix Tree')
@@ -47,7 +46,6 @@ def get_args():
                         default=100)
 
     return parser.parse_args()
-
 
 def add_suffix(nodes, suf):
     n = 0
@@ -78,15 +76,16 @@ def add_suffix(nodes, suf):
         i += j
         n = n2
 
-def build_suffix_tree(text, show_progress=True):
+def build_suffix_tree(text, show_progress=False):
     text += "$"
 
     nodes = [ ['', {}] ]
     
-    process = psutil.Process(os.getpid())
-    start_mem = process.memory_info().rss / 1024 / 1024
-    available_mem = psutil.virtual_memory().available / 1024 / 1024
-    print("Total available memory: {:.2f} MB".format(available_mem))
+    ## uncomment this for memory usage reporting in larger runs
+    # process = psutil.Process(os.getpid())
+    # start_mem = process.memory_info().rss / 1024 / 1024
+    # available_mem = psutil.virtual_memory().available / 1024 / 1024
+    # print("Total available memory: {:.2f} MB".format(available_mem))
         
     iterator = tqdm.tqdm(range(len(text)), desc="Building suffix tree") if show_progress else range(len(text))
     
@@ -190,7 +189,5 @@ def main():
                     match_len = search_tree(tree, query)
                     print(f'{query} : {match_len}')
     
-
-
 if __name__ == '__main__':
     main()

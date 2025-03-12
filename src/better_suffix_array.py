@@ -5,125 +5,79 @@ import sys
 # trying a few different import approaches based on how the script is being run
 try:
     # first try relative import first (for use when imported as module)
-    from . import suffix_tree
+    from . import ukkonens_suffix_tree
     from . import utils
 except ImportError:
     try:
         # try package import (for tests)
-        import src.suffix_tree as suffix_tree
+        import src.ukkonens_suffix_tree as ukkonens_suffix_tree
         import src.utils as utils
     except ImportError:
         # try direct import (for direct script execution)
-        import suffix_tree
+        import ukkonens_suffix_tree
         import utils
-
-SUB = 0
-CHILDREN = 1
-
+        
 def get_args():
-    parser = argparse.ArgumentParser(description='Suffix Tree')
-
+    parser = argparse.ArgumentParser(description='Suffix Tree to Suffix Array Converter')
     parser.add_argument('--reference',
                         help='Reference sequence file',
                         type=str)
-
     parser.add_argument('--string',
                         help='Reference sequence',
                         type=str)
-
     parser.add_argument('--query',
                         help='Query sequences',
                         nargs='+',
                         type=str)
-    
     parser.add_argument('--region',
                         help='Region to visualize (format: start-end)',
                         type=str)
-    
     parser.add_argument('--max-size',
                         help='Maximum sequence length to visualize (default: 200)',
                         type=int,
                         default=100)
-
     return parser.parse_args()
 
 def build_suffix_array(T):
-    tree = suffix_tree.build_suffix_tree(T)
-    # print("\n" + "="*50)
-    # print(f"Input String: {T}")
-    # print(f"Suffix Tree Structure:\n{tree}")
-    # print("="*50 + "\n")
-    suffixes = []
-    # Your code here
-
-    # defs
-    # BFS traversal of suffix tree
-    # modified the stack to work with the suffix tree structure
-    stack = [(0, "")]
+    """
+    Build a suffix array from the input string T using a suffix tree constructed
+    via Ukkonen's algorithm.
     
-    # print("Starting BFS Traversal...\n")
-    while stack:
-        node_idx, current_suffix = stack.pop()
-        node = tree[node_idx]
-        substring, children = node[0], node[1]
-        
-        # print("-"*40)
-        # print(f"Current Node Index: {node_idx}")
-        # print(f"Current Node: {node}")
-        # print(f"Current Suffix: '{current_suffix}'")
-        # print(f"Substring at Node: '{substring}'")
-        # print(f"Children: {children}")
-        
-        # if we are at a leaf node (no children left)
-        if not children:
-            full_suffix = (current_suffix + substring).rstrip('$')
-            if not full_suffix:
-                continue
-            suffix_position = len(T) - len(full_suffix)
-            suffixes.append(suffix_position)
-            # print(f"✓ Leaf Node Found!")
-            # print(f"  Full Suffix: '{full_suffix}'")
-            # print(f"  Position: {suffix_position}")
-        # else:
-            # print("-"*40)
-            # print("✗ Not a Leaf Node")
-            # print("\n Processing/Pushing Children to Stack...")
-        
-        # add children to stack
-        for char, child_idx in children.items():
-            new_suffix = current_suffix + substring
-            stack.append((child_idx, current_suffix + substring))
-        #     print(f"  → Adding to stack: (node={child_idx}, suffix='{new_suffix}')")
-        # print()
-        
-    # print("BFS Traversal Complete!\n")
-    # print(f"Suffix Array: {suffixes}")
-    # print()
-            
-    suffixes = sorted(suffixes, key=lambda x: T[x:])  # Sort based on the actual suffix strings
-    # print("="*50)
-    # print(f"Sorted Suffix Array: {suffixes}")
-    # print("="*50)
+    This method builds the suffix tree and then performs a DFS (visiting children
+    in lexicographic order) to extract leaf nodes’ suffix indices.
+    """
+    # Build the suffix tree (this runs Ukkonen's algorithm under the hood).
+    st = ukkonens_suffix_tree.SuffixTree(T)
+    suffix_array = []
 
-    return suffixes
+    def dfs(node):
+        # If the node is a leaf, append its stored suffix index.
+        if not node.children:
+            suffix_array.append(node.index)
+        else:
+            # Traverse children in lexicographic order (by edge-starting character).
+            for key in sorted(node.children.keys()):
+                dfs(node.children[key])
+                
+    dfs(st.root)
+    return suffix_array
 
 def search_array(T, suffix_array, q):
-
-    # checks how many characters at the beginning of the string s and query q are the same
-    # looping through the string and query until the characters are no longer the same or the end of either the string/query is reached
+    """
+    Perform a binary search on the suffix array to determine how many characters 
+    at the beginning of the suffix match the query q.
+    """
     def prefix_overlap(s, q): 
-        
         i = 0
         while i < len(s) and i < len(q) and s[i] == q[i]:
             i += 1
         return i
 
-    # all indices in the suffix array will be covered with these two pointers
     lo = -1
     hi = len(suffix_array)
     
     while (hi - lo > 1):
-        mid = int((lo + hi) / 2)
+        mid = (lo + hi) // 2
         if T[suffix_array[mid]:] < q:
             lo = mid
         else:
@@ -133,21 +87,18 @@ def search_array(T, suffix_array, q):
 
 def main():
     args = get_args()
-
     T = None
 
-    # create script-specific directories
-    txt_dir = os.path.join('txts', 'suffix_array')
-    
-    # create directories if they don't exist
+    # Create script-specific directories
+    txt_dir = os.path.join('txts', 'ukkonens_suffix_array')
     os.makedirs(txt_dir, exist_ok=True)
 
     if args.string:
         T = args.string
         array = build_suffix_array(T)
         
-        # create and save visualization
-        txt_file = f'{args.string}_suffix_array.txt'
+        # Optionally, visualize the suffix array
+        txt_file = f'{args.string}_ukkonens_suffix_array.txt'
         txt_path = os.path.join(txt_dir, txt_file)
         utils.visualize_suffix_array(T, array, txt_path)
         
@@ -156,22 +107,18 @@ def main():
                 match_len = search_array(T, array, query)
                 print(f'{query} : {match_len}')
                 
-    # passing in the FASTA file
     elif args.reference:
         reference = utils.read_fasta(args.reference)
         T = reference[0][1]
         
-        # just handle a specific region
         if args.region:
             try:
                 start, end = map(int, args.region.split('-'))
                 
-                # validate region
                 if start < 0 or end > len(T) or start >= end:
                     print(f"Invalid region: {start}-{end}. Sequence length is {len(T)}.")
                     return
                 
-                # check size limit
                 if end - start > args.max_size:
                     print(f"Warning: Selected region exceeds max size ({args.max_size}). Truncating.")
                     end = start + args.max_size
@@ -179,13 +126,12 @@ def main():
                 region = T[start:end]
                 array = build_suffix_array(region)
                 
-                # create visualization
                 reference_name = os.path.basename(args.reference).split('.')[0]
-                txt_file = f'{reference_name}_{start}-{end}_suffix_array.txt'
+                txt_file = f'{reference_name}_{start}-{end}_ukkonens_suffix_array.txt'
                 txt_path = os.path.join(txt_dir, txt_file)
                 
                 utils.visualize_suffix_array(region, array, txt_path)
-                print(f"Generated suffix array visualization for region {start}-{end}")
+                print(f"Generated Ukkonen's suffix array visualization for region {start}-{end}")
                 
                 if args.query:
                     for query in args.query:

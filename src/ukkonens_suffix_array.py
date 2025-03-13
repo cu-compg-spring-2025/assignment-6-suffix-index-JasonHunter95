@@ -50,11 +50,11 @@ def build_suffix_array(T):
     suffix_array = []
 
     def dfs(node):
-        # If the node is a leaf, append its stored suffix index.
+        # if the node is a leaf, append its stored suffix index.
         if not node.children:
             suffix_array.append(node.index)
         else:
-            # Traverse children in lexicographic order (by edge-starting character).
+            # traverse children in lexicographic order (by edge-starting character).
             for key in sorted(node.children.keys()):
                 dfs(node.children[key])
                 

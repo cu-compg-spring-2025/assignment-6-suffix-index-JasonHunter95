@@ -49,16 +49,9 @@ def get_args():
 
 def build_suffix_array(T):
     tree = suffix_tree.build_suffix_tree(T)
-    # print("\n" + "="*50)
-    # print(f"Input String: {T}")
-    # print(f"Suffix Tree Structure:\n{tree}")
-    # print("="*50 + "\n")
     suffixes = []
-    # Your code here
 
-    # defs
     # BFS traversal of suffix tree
-    # modified the stack to work with the suffix tree structure
     stack = [(0, "")]
     
     # print("Starting BFS Traversal...\n")
@@ -67,13 +60,6 @@ def build_suffix_array(T):
         node = tree[node_idx]
         substring, children = node[0], node[1]
         
-        # print("-"*40)
-        # print(f"Current Node Index: {node_idx}")
-        # print(f"Current Node: {node}")
-        # print(f"Current Suffix: '{current_suffix}'")
-        # print(f"Substring at Node: '{substring}'")
-        # print(f"Children: {children}")
-        
         # if we are at a leaf node (no children left)
         if not children:
             full_suffix = (current_suffix + substring).rstrip('$')
@@ -81,29 +67,12 @@ def build_suffix_array(T):
                 continue
             suffix_position = len(T) - len(full_suffix)
             suffixes.append(suffix_position)
-            # print(f"✓ Leaf Node Found!")
-            # print(f"  Full Suffix: '{full_suffix}'")
-            # print(f"  Position: {suffix_position}")
-        # else:
-            # print("-"*40)
-            # print("✗ Not a Leaf Node")
-            # print("\n Processing/Pushing Children to Stack...")
         
         # add children to stack
         for char, child_idx in children.items():
-            new_suffix = current_suffix + substring
             stack.append((child_idx, current_suffix + substring))
-        #     print(f"  → Adding to stack: (node={child_idx}, suffix='{new_suffix}')")
-        # print()
-        
-    # print("BFS Traversal Complete!\n")
-    # print(f"Suffix Array: {suffixes}")
-    # print()
             
-    suffixes = sorted(suffixes, key=lambda x: T[x:])  # Sort based on the actual suffix strings
-    # print("="*50)
-    # print(f"Sorted Suffix Array: {suffixes}")
-    # print("="*50)
+    suffixes = sorted(suffixes, key=lambda x: T[x:])  # sort based on the actual suffix strings
 
     return suffixes
 

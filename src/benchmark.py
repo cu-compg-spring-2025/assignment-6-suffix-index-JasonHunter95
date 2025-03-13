@@ -1,3 +1,4 @@
+import argparse
 import time
 from venv import create
 import os
@@ -20,8 +21,18 @@ import resource
 soft, hard = resource.getrlimit(resource.RLIMIT_AS)
 resource.setrlimit(resource.RLIMIT_AS, (hard, hard))
 
-def generate_random_sequence(length, alphabet="ACGT"):
+def get_args():
+    """Parse command line arguments."""
+    parser = argparse.ArgumentParser(description="Benchmark suffix data structures.")
+    parser.add_argument("--alphabet", type=str, default="ACGT", help="Alphabet for random sequence generation")
+    parser.add_argument("--construction", action="store_true", help="Run construction benchmarks")
+    parser.add_argument("--query", action="store_true", help="Run query benchmarks")
+    parser.add_argument("--output_dir", type=str, default="figures", help="Output directory for plots")
+    return parser.parse_args()
+
+def generate_random_sequence(length, alphabet):
     """Generate a random sequence of specified length from the given alphabet."""
+    alphabet = get_args().alphabet
     choices = np.random.choice(list(alphabet), size=length)
     random_sequence = ''.join(choices)
     return random_sequence
@@ -38,9 +49,6 @@ def measure_construction(fn, sequence):
     mem_usage = mem_usage / (1024 * 1024)  # convert these to MB from bytes
     curr = curr / (1024 * 1024)
     tracemalloc.stop()
-    
-    # print(f"Current memory usage: {curr} MB")
-    # print(f"Peak memory usage: {mem_usage} MB")
     return result, elapsed_time, mem_usage
 
 # helper function for construction benchmarking
@@ -75,7 +83,7 @@ def benchmark_construction(sizes, repeats, trie_max_size, naive_max_size):
     
     for size in tqdm(sizes, desc="Benchmarking sequence sizes"):
         for _ in range(repeats):
-            sequence = generate_random_sequence(size)
+            sequence = generate_random_sequence(size, get_args().alphabet)
                     
             if size <= naive_max_size:
                 for build_fn, name in naive_build_methods:
@@ -102,7 +110,7 @@ def benchmark_construction(sizes, repeats, trie_max_size, naive_max_size):
     return pd.DataFrame(results)
 
 # helper function for query benchmarking
-def measure_and_record_query(search_fn, structure, text, query, requires_text, size, query_length, structure_name):
+def measure_query(search_fn, structure, text, query, requires_text, size, query_length, structure_name):
     """Measure and record the time taken for a single query operation."""
     try:
         start = time.perf_counter()
@@ -124,9 +132,9 @@ def measure_and_record_query(search_fn, structure, text, query, requires_text, s
 def benchmark_query(sizes, query_lengths, repeats, trie_max_size):
     """Benchmark query time for different sequence and query sizes."""
     results = []
-    
+    alphabet = get_args().alphabet
     for size in tqdm(sizes, desc="Benchmarking queries"):
-        sequence = generate_random_sequence(size)
+        sequence = generate_random_sequence(size, alphabet)
         
         # build data structures
         trie = suffix_trie.build_suffix_trie(sequence, show_progress=False) if size <= trie_max_size else None
@@ -161,7 +169,7 @@ def benchmark_query(sizes, query_lengths, repeats, trie_max_size):
                                  trie if name == "Suffix Trie" else
                                  ukkonens_array if name == "Ukkonen's Suffix Array" else
                                  ukkonens_tree if name == "Ukkonen's Suffix Tree" else None)
-                    record = measure_and_record_query(search_fn, structure, sequence, query, requires_text, size, qlen, name)
+                    record = measure_query(search_fn, structure, sequence, query, requires_text, size, qlen, name)
                     if record:
                         results.append(record)
     
@@ -190,13 +198,6 @@ def create_loglog_plot(x, y, hue, data, title, xlabel, ylabel, filename, output_
     path = os.path.join(output_dir, filename)
     plt.savefig(path, dpi=300, bbox_inches='tight')
     plt.close()
-    
-# def compute_slope(x_values, y_values):
-#     """Compute the slope of the line in a log-log plot using linear regression."""
-#     log_x = np.log10(x_values)
-#     log_y = np.log10(y_values)
-#     slope, intercept = np.polyfit(log_x, log_y, 1)
-#     return slope, intercept
 
 def plot_construction_results(results, output_dir='figures'):
     """Plot construction benchmark results.
@@ -210,11 +211,13 @@ def plot_construction_results(results, output_dir='figures'):
 
     # plot construction time with theoretical guidelines: O(n) and O(n log n) and O(n^2)
     scale_factor = results['construction_time'].median() / results['sequence_size'].median()
-    extra_lines_time = [
+    extra_lines = [
         ('k-.', 'O(n^2)', lambda x: scale_factor * x**2),
         ('k--', 'O(n)', lambda x: scale_factor * x),
-        ('k:', 'O(n log n)', lambda x: scale_factor * x * np.log(x))
+        ('k:', 'O(n log n)', lambda x: scale_factor * x * np.log(x)),
+        ('k!', 'O(n^2 log n)', lambda x: scale_factor * x**2 * np.log(x))
     ]
+    
     # construction time
     create_loglog_plot(
         x='sequence_size',
@@ -226,7 +229,7 @@ def plot_construction_results(results, output_dir='figures'):
         ylabel='Time (seconds)',
         filename='construction_time.png',
         output_dir='figures',
-        extra_lines=extra_lines_time
+        extra_lines=extra_lines
     )
 
     # memory usage
@@ -239,7 +242,8 @@ def plot_construction_results(results, output_dir='figures'):
         xlabel='Sequence Size (bp)',
         ylabel='Memory Usage (MB)',
         filename='memory_usage.png',
-        output_dir='figures'
+        output_dir='figures',
+        extra_lines=extra_lines
     )
 
 def plot_query_results(results, output_dir='figures'):
@@ -348,7 +352,9 @@ def create_performance_dashboard(construction_results, query_results, output_dir
 
 def main():
     """Run the benchmarking suite."""
-    construction_sizes = [10, 100, 1000, 5000, 10000, 50000, 100000, 500000, 1000000, 10000000]
+    get_args()
+    
+    construction_sizes = [10, 100, 1000, 5000, 10000, 100000, 1000000, 10000000]
     
     # for querying, use a subset of sizes to keep runtime reasonable
     query_sizes = [50, 100, 500, 1000, 5000, 10000]
@@ -370,11 +376,6 @@ def main():
     plot_query_results(query_results)
     
     create_performance_dashboard(construction_results, query_results)
-    
-    # slope = compute_slope(construction_results['sequence_size'], construction_results['construction_time'])
-    # print(f"Construction time slope: {slope[0]:.2f}")
-    # slope2 = compute_slope(construction_results['sequence_size'], construction_results['memory_usage_mb'])
-    # print(f"Memory usage slope: {slope2[0]:.2f}")
         
     print("Benchmarking complete! Results saved to 'figures' directory.")
 

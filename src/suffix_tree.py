@@ -81,25 +81,10 @@ def build_suffix_tree(text, show_progress=False):
 
     nodes = [ ['', {}] ]
     
-    ## uncomment this for memory usage reporting in larger runs
-    # process = psutil.Process(os.getpid())
-    # start_mem = process.memory_info().rss / 1024 / 1024
-    # available_mem = psutil.virtual_memory().available / 1024 / 1024
-    # print("Total available memory: {:.2f} MB".format(available_mem))
-        
     iterator = tqdm.tqdm(range(len(text)), desc="Building suffix tree") if show_progress else range(len(text))
-    
-    ## uncomment this for memory usage reporting in larger runs
-    # report_interval = max(1, len(text) // 10)  # reports ~10 times
-
     
     for i in iterator:
         add_suffix(nodes, text[i:])
-    ## uncomment this for memory usage reporting in larger runs    
-    # if i % report_interval == 0:
-    #     current_mem = process.memory_info().rss / 1024 / 1024
-    #     mem_increase = current_mem - start_mem
-    #     print(f"Memory usage: {current_mem:.2f} MB (+{mem_increase:.2f} MB)")
     
     return nodes
 

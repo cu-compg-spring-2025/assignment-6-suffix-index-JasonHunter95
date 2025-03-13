@@ -41,16 +41,16 @@ def get_args():
 # Ukkonen's algorithm implementation
 class Node:
     def __init__(self, start, end):
-        # Children: mapping from character -> Node.
+        # children: mapping from character -> Node.
         self.children = {}
-        # Suffix link used to speed up tree construction.
+        # suffix link used to speed up tree construction.
         self.suffix_link = None  
-        # Start index of the edge label from the parent.
+        # start index of the edge label from the parent.
         self.start = start
-        # End index for the edge label.
-        # For leaves, end is a reference (list) to the global end pointer.
+        # end index for the edge label.
+        # for leaves, end is a reference (list) to the global end pointer.
         self.end = end  
-        # For leaf nodes, we later set an index indicating the starting position of the suffix.
+        # for leaf nodes, we later set an index indicating the starting position of the suffix.
         self.index = -1
 
     def edge_length(self, current_index):
@@ -64,31 +64,31 @@ class Node:
 
 class SuffixTree:
     def __init__(self, text):
-        # Ensure the text ends with a unique terminal symbol.
+        # ensure the text ends with a unique terminal symbol.
         self.text = text
         self.size = len(text)
         
-        # Create the root node. (Start and end values for root are arbitrary.)
+        # create the root node. (Start and end values for root are arbitrary.)
         self.root = Node(-1, -1)
         self.root.suffix_link = self.root  # type: ignore
         
-        # Active point for Ukkonen’s algorithm.
+        # active point for Ukkonen’s algorithm.
         self.active_node = self.root
         self.active_edge = -1
         self.active_length = 0
         
-        # Remainder counts the number of suffixes yet to be added.
+        # remainder counts the number of suffixes yet to be added.
         self.remaining_suffix_count = 0
         
-        # Global end for all leaves; stored as a one-element list so that it acts as a reference.
+        # global end for all leaves; stored as a one-element list so that it acts as a reference.
         self.leaf_end = [-1]
         
-        # This variable holds the most recently created internal node
+        # this variable holds the most recently created internal node
         # during the current extension to set its suffix link.
         self.last_new_node = None
 
         self.build_suffix_tree()
-        # Optionally, assign a suffix index for each leaf by DFS.
+        # optionally, assign a suffix index for each leaf by DFS.
         self._set_suffix_index_by_dfs(self.root, 0)
 
     def build_suffix_tree(self):
@@ -96,38 +96,38 @@ class SuffixTree:
             self._extend_suffix_tree(pos)
 
     def _extend_suffix_tree(self, pos):
-        # Update the global end pointer.
+        # update the global end pointer.
         self.leaf_end[0] = pos
         self.remaining_suffix_count += 1
         self.last_new_node = None
 
         while self.remaining_suffix_count > 0:
             if self.active_length == 0:
-                self.active_edge = pos  # The current character position becomes the active edge.
+                self.active_edge = pos  # the current character position becomes the active edge.
             
             current_char = self.text[self.active_edge]
-            # If there is no edge starting with current_char from active_node:
+            # if there is no edge starting with current_char from active_node:
             if current_char not in self.active_node.children:
-                # Create a new leaf node.
+                # create a new leaf node.
                 self.active_node.children[current_char] = Node(pos, self.leaf_end)
-                # If an internal node was waiting for a suffix link, then set it.
+                # if an internal node was waiting for a suffix link, then set it.
                 if self.last_new_node is not None:
                     self.last_new_node.suffix_link = self.active_node  # type: ignore
                     self.last_new_node = None
             else:
-                # There is an outgoing edge starting with current_char.
+                # there is an outgoing edge starting with current_char.
                 next_node = self.active_node.children[current_char]
                 edge_length = next_node.edge_length(pos)
-                # If the active_length is greater than or equal to the edge length,
+                # if the active_length is greater than or equal to the edge length,
                 # walk down the edge.
                 if self.active_length >= edge_length:
                     self.active_edge += edge_length
                     self.active_length -= edge_length
                     self.active_node = next_node
                     continue
-                # Check if the next character on the edge matches the current character.
+                # check if the next character on the edge matches the current character.
                 if self.text[next_node.start + self.active_length] == self.text[pos]:
-                    # The current character is already on the edge;
+                    # the current character is already on the edge;
                     # we only need to increment active_length.
                     if self.last_new_node is not None and self.active_node != self.root:
                         self.last_new_node.suffix_link = self.active_node  # type: ignore
@@ -135,19 +135,19 @@ class SuffixTree:
                     self.active_length += 1
                     break
 
-                # Mismatch found: split the edge.
+                # mismatch found: split the edge.
                 split_end = next_node.start + self.active_length - 1
                 split = Node(next_node.start, split_end)
                 self.active_node.children[current_char] = split
 
-                # Create a new leaf node from the split node.
+                # create a new leaf node from the split node.
                 split.children[self.text[pos]] = Node(pos, self.leaf_end)
-                # Adjust the start of the old node.
+                # adjust the start of the old node.
                 next_node.start += self.active_length
-                # Add the old node as a child of the split node.
+                # add the old node as a child of the split node.
                 split.children[self.text[next_node.start]] = next_node
 
-                # If an internal node was created in a previous extension in the same phase,
+                # if an internal node was created in a previous extension in the same phase,
                 # then set its suffix link to the split node.
                 if self.last_new_node is not None:
                     self.last_new_node.suffix_link = split  # type: ignore

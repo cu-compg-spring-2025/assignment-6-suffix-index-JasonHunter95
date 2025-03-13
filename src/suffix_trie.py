@@ -35,12 +35,6 @@ def get_args():
 def build_suffix_trie(s, show_progress=False):
     s += '$'
     root = {}
-    
-    # process = psutil.Process(os.getpid())
-    # start_mem = process.memory_info().rss / 1024 / 1024
-    # available_mem = psutil.virtual_memory().available / 1024 / 1024
-    # print("Total available memory: {:.2f} MB".format(available_mem))
-    
     iterator = tqdm.tqdm(range(len(s)), desc="Building suffix trie") if show_progress else range(len(s))
     for i in iterator:
         current = root

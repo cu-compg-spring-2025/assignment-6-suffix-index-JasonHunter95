@@ -11,12 +11,12 @@
 \section{Introduction}
 In my analysis, I implemented and ran comparisons on several suffix data structures - 
 specifically suffix tries, suffix trees, and suffix arrays. 
-I then compared the performance of these data structures in terms of runtime and memory usage, with
-the goal of determining which data structure is the best choice for sequence processing tasks relevent to bioinformatics.
-I developed methods for constructing these structures and querying them. In my search for more efficient data structures, I came across
-Ukonnen's algorithm, which is a linear time algorithm for constructing suffix trees, and subsequently suffix arrays as well.
-I used this algorithm to construct suffix trees and suffix arrays, and compared their performance to that of suffix tries,
-as well as to the basic suffix tree and suffix array construction approaches. 
+I looked at both the performance runtime and memory usage of these data structures, with
+the goal of determining which suffix structure is the best choice for sequence processing tasks relevent to bioinformatics.
+I developed methods for building these structures and querying them. In my search for more efficient data structures,
+I came across an optimization which constructs suffix trees and suffix arrays in linear time, called Ukkonen's algorithm.
+I used this algorithm to make \textit{Ukkonen's} suffix trees and arrays, and compared their performance to that of suffix tries,
+as well as to the naive suffix tree and array construction approaches. 
 The experiments I ran showed that suffix arrays are the most efficient data structure in terms of runtime and memory usage,
 particularly at scale when the size of the input sequence is large. This is even more pronounced when the suffix array is constructed using Ukonnen's algorithm.
 Suffix tries were very memory intensive, and could only be used for small input sequences. Suffix trees were more memory efficient than suffix tries, but still
@@ -25,11 +25,10 @@ in close to linear time, which was a significant improvement over the naive cons
 was the only data structure that could handle large input sequences larger than 100,000 efficiently, and is the best choice for sequence processing tasks in bioinformatics.
 
 
-
 \section{Results}
-I created a benchmark suite to compare the performance of suffix tries, suffix trees, and suffix arrays.
-It builds and queries each structure using a variety of input sequences, and records the time and memory usage for each operation.
-The following graphs show the results of these benchmarks.
+I developed a benchmarking framework to measure the construction and query performance of suffix tries, suffix trees, and suffix arrays. 
+This involved constructing and querying each structure with varying input sequence sizes while recording runtime and memory usage. 
+The results are presented in the figures below.
 
 \subsection{Runtime Comparison} 
 
@@ -82,10 +81,11 @@ The suffix array constructed with the modified BFS approach is more memory inten
 
 \subsection{}
 
-
 \subsection{}
 
 \section{Conclusion}
+In conclusion, I found that the suffix array is the most efficient data structure for sequence processing tasks in bioinformatics, 
+particularly at scale.
 
 \section{Dependencies}
 \begin{itemize}

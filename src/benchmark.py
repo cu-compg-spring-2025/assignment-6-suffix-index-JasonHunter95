@@ -353,7 +353,7 @@ def main():
     """Run the benchmarking suite."""
     get_args()
     
-    construction_sizes = [10, 100, 1000, 5000]
+    construction_sizes = [10, 100, 1000, 10000, 100000, 1000000]
     
     # for querying, use a subset of sizes to keep runtime reasonable
     query_sizes = [50, 100, 500, 1000, 5000, 10000]

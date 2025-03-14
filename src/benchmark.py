@@ -16,10 +16,10 @@ import suffix_tree
 import suffix_trie
 import ukkonens_suffix_tree
 import ukkonens_suffix_array
-import resource
+# import resource
 
-soft, hard = resource.getrlimit(resource.RLIMIT_AS)
-resource.setrlimit(resource.RLIMIT_AS, (hard, hard))
+# soft, hard = resource.getrlimit(resource.RLIMIT_AS)
+# resource.setrlimit(resource.RLIMIT_AS, (hard, hard))
 
 def get_args():
     """Parse command line arguments."""
@@ -215,7 +215,6 @@ def plot_construction_results(results, output_dir='figures'):
         ('k-.', 'O(n^2)', lambda x: scale_factor * x**2),
         ('k--', 'O(n)', lambda x: scale_factor * x),
         ('k:', 'O(n log n)', lambda x: scale_factor * x * np.log(x)),
-        ('k!', 'O(n^2 log n)', lambda x: scale_factor * x**2 * np.log(x))
     ]
     
     # construction time
@@ -354,7 +353,7 @@ def main():
     """Run the benchmarking suite."""
     get_args()
     
-    construction_sizes = [10, 100, 1000, 5000, 10000, 100000, 1000000, 10000000]
+    construction_sizes = [10, 100, 1000, 5000]
     
     # for querying, use a subset of sizes to keep runtime reasonable
     query_sizes = [50, 100, 500, 1000, 5000, 10000]
